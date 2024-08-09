@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloaks-deployment
+spec:
+  selector:
+    matchLabels:
+      app: helloaks-api
+  template:
+    metadata:
+      labels:
+        app: helloaks-api
+    spec:
+      containers:
+      - name: helloaks-api
+        image: shoppingappregistry.azurecr.io/hellodocker:1.0.0
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloaks-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: helloaks-api
+  ports:
+  - port: 80
+    targetPort: 8080
+

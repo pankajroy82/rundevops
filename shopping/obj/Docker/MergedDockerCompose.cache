@@ -1,0 +1,78 @@
+name: dockercompose12970568396639499822
+services:
+  shopping.api:
+    build:
+      context: C:\Users\reyaa\source\repos\shopping
+      dockerfile: shopping.api/Dockerfile
+    container_name: shoppingapi
+    depends_on:
+      shopping.db:
+        condition: service_started
+        required: true
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings:ConnectionString: mongodb://shoppingdb:27017
+    image: shoppingapi
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8000"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: C:\Users\reyaa\AppData\Roaming/Microsoft/UserSecrets
+        target: /home/app/.microsoft/usersecrets
+        read_only: true
+        bind:
+          create_host_path: true
+      - type: bind
+        source: C:\Users\reyaa\AppData\Roaming/ASP.NET/Https
+        target: /home/app/.aspnet/https
+        read_only: true
+        bind:
+          create_host_path: true
+  shopping.client:
+    build:
+      context: C:\Users\reyaa\source\repos\shopping
+      dockerfile: shopping.client/Dockerfile
+    container_name: shoppingclient
+    depends_on:
+      shopping.api:
+        condition: service_started
+        required: true
+      shopping.db:
+        condition: service_started
+        required: true
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ShoppingAPIURL: http://shoppingapi:8080
+    image: shoppingclient
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8001"
+        protocol: tcp
+  shopping.db:
+    container_name: shoppingdb
+    image: mongo
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 27017
+        published: "27017"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /site
+        target: /data/db
+        bind:
+          create_host_path: true
+networks:
+  default:
+    name: dockercompose12970568396639499822_default
